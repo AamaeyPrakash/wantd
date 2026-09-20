@@ -20,7 +20,6 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Settings
@@ -31,7 +30,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
@@ -45,7 +43,7 @@ import com.tapshop.ui.components.SectionHeader
 import com.tapshop.ui.components.Skeleton
 import com.tapshop.ui.components.SparkleIcon
 import com.tapshop.ui.components.SurfaceCard
-import com.tapshop.ui.components.TagIcon
+import com.tapshop.ui.components.WantdLogo
 import com.tapshop.ui.theme.TapTheme
 
 @Composable
@@ -69,13 +67,7 @@ private fun PhoneHome() {
     ) {
         item {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier.size(28.dp).clip(CircleShape).background(c.pill), contentAlignment = Alignment.Center) {
-                        Icon(TagIcon, null, tint = c.onPill, modifier = Modifier.size(15.dp))
-                    }
-                    Spacer(Modifier.width(8.dp))
-                    Text(s.appName, style = MaterialTheme.typography.titleMedium, color = c.onSurface)
-                }
+                WantdLogo(height = 30.dp)
                 Spacer(Modifier.weight(1f))
                 CircleIconButton(Icons.Rounded.Settings, s.tabSettings, onClick = { nav.push(Screen.Settings) }, size = 40.dp)
             }

@@ -128,23 +128,34 @@ data class AnalyticsSummary(
 data class CompareRequest(
     val uid: String,
     val articleIds: List<String>,
-    val userImagesBase64: List<String> = emptyList(),
-    val question: String? = null,
+    val preferences: ComparePreferences,
     val language: String = "en",
 )
 
 @Serializable
-data class CompareCriterion(
-    val name: String,
-    val scores: Map<String, Int>,
-    val note: String,
+enum class ColorPreference { ANY, NEUTRAL, DARK, LIGHT, BOLD }
+
+@Serializable
+enum class FitPreference { ANY, RELAXED, REGULAR, TAILORED, OVERSIZED }
+
+@Serializable
+enum class OccasionPreference { ANY, EVERYDAY, WORK, EVENING, TRAVEL }
+
+@Serializable
+enum class ShoppingPriority { ANY, PRICE, QUALITY, VERSATILITY, COMFORT }
+
+@Serializable
+data class ComparePreferences(
+    val color: ColorPreference,
+    val fit: FitPreference,
+    val occasion: OccasionPreference,
+    val priority: ShoppingPriority,
 )
 
 @Serializable
 data class CompareResult(
     val summary: String,
     val winnerArticleId: String? = null,
-    val criteria: List<CompareCriterion> = emptyList(),
     val recommendation: String = "",
     val mock: Boolean = false,
 )

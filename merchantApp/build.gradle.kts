@@ -40,7 +40,7 @@ compose.desktop {
         mainClass = "com.tapshop.merchant.MainKt"
         nativeDistributions {
             targetFormats(TargetFormat.Msi, TargetFormat.Dmg, TargetFormat.Deb)
-            packageName = "TapShop Merchant"
+            packageName = "wantd. Merchant"
             packageVersion = "1.0.0"
         }
     }

@@ -78,7 +78,7 @@ fun WishlistScreen() {
     val grouped = entries.groupBy { it.store.id }
 
     fun toggle(id: String) {
-        selected.value = if (id in selected.value) selected.value - id else if (selected.value.size < 4) selected.value + id else selected.value
+        selected.value = if (id in selected.value) selected.value - id else if (selected.value.size < 2) selected.value + id else selected.value
     }
 
     val wide = LocalWideLayout.current
@@ -107,6 +107,11 @@ fun WishlistScreen() {
                             }.padding(8.dp),
                         )
                     }
+                }
+            }
+            if (selecting) {
+                item(span = fullRow) {
+                    Text(s.selectAtLeastTwo, style = MaterialTheme.typography.bodySmall, color = c.secondary)
                 }
             }
             if (entries.isEmpty()) {
@@ -156,20 +161,20 @@ fun WishlistScreen() {
             enter = fadeIn() + slideInVertically { it },
             exit = fadeOut() + slideOutVertically { it },
         ) {
-            val count = selected.value.size
-            val label = if (selecting) "${s.compareWithAi} ($count)" else s.compareWithAi
+            val selectedIds = entries.map { it.article.id }.filter { it in selected.value }
+            val count = selectedIds.size
+            val label = if (selecting) "${s.compareWithAi} ($count/2)" else s.compareWithAi
             PillButton(
                 text = label,
                 icon = SparkleIcon,
                 style = PillStyle.Primary,
-                enabled = !selecting || count >= 2,
+                enabled = !selecting || count == 2,
                 onClick = {
                     if (!selecting) {
-                        // Without an explicit selection, compare everything saved (max 4).
-                        val ids = entries.take(4).map { it.article.id }
-                        nav.push(Screen.Compare(ids))
-                    } else if (count >= 2) {
-                        nav.push(Screen.Compare(entries.map { it.article.id }.filter { it in selected.value }))
+                        selecting = true
+                        selected.value = emptySet()
+                    } else if (count == 2) {
+                        nav.push(Screen.Compare(selectedIds))
                     } else {
                         toast.show(s.selectAtLeastTwo)
                     }

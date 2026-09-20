@@ -31,7 +31,6 @@ object Config {
     val port: Int = setting("PORT")?.toIntOrNull() ?: 8080
     val openAiApiKey: String? = setting("OPENAI_API_KEY")
     val openAiModel: String? = setting("OPENAI_MODEL")
-    val aiMock: Boolean = setting("AI_MOCK")?.equals("true", ignoreCase = true) == true || openAiApiKey == null
     val buyerDist: String = setting("WEB_DIST_BUYER") ?: "buyerApp/build/dist/wasmJs/productionExecutable"
     val merchantDist: String = setting("WEB_DIST_MERCHANT") ?: "merchantApp/build/dist/wasmJs/productionExecutable"
     const val VERSION = "0.1.0"

@@ -12,7 +12,7 @@ fun main() = application {
     val settings = AppSettings("merchant")
     Window(
         onCloseRequest = ::exitApplication,
-        title = "TapShop Merchant",
+        title = "wantd. Merchant",
         state = rememberWindowState(size = DpSize(1280.dp, 840.dp), position = WindowPosition.Aligned(androidx.compose.ui.Alignment.Center)),
     ) {
         MerchantApp(settings)

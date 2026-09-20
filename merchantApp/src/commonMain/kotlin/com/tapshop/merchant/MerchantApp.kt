@@ -50,7 +50,7 @@ import com.tapshop.merchant.screens.MerchantSettingsScreen
 import com.tapshop.ui.app.LocalApi
 import com.tapshop.ui.app.TapShopApp
 import com.tapshop.ui.components.StatusDot
-import com.tapshop.ui.components.TagIcon
+import com.tapshop.ui.components.WantdLogo
 import com.tapshop.ui.settings.AppSettings
 import com.tapshop.ui.theme.TapTheme
 
@@ -107,16 +107,15 @@ private fun Sidebar(selected: MerchantSection, compact: Boolean, onSelect: (Merc
             .background(c.surface)
             .padding(horizontal = if (compact) 12.dp else 16.dp, vertical = 20.dp),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 6.dp)) {
-            Box(Modifier.size(36.dp).clip(RoundedCornerShape(12.dp)).background(c.pill), contentAlignment = Alignment.Center) {
-                Icon(TagIcon, null, tint = c.onPill, modifier = Modifier.size(18.dp))
+        if (compact) {
+            Box(Modifier.size(52.dp), contentAlignment = Alignment.Center) {
+                WantdLogo(height = 24.dp)
             }
-            if (!compact) {
-                Spacer(Modifier.width(10.dp))
-                Column {
-                    Text(s.appName, style = MaterialTheme.typography.titleMedium, color = c.onSurface)
-                    Text("Merchant", style = MaterialTheme.typography.labelSmall, color = c.secondary)
-                }
+        } else {
+            Column(Modifier.padding(horizontal = 6.dp)) {
+                WantdLogo(height = 30.dp)
+                Spacer(Modifier.height(4.dp))
+                Text("Merchant", style = MaterialTheme.typography.labelSmall, color = c.secondary)
             }
         }
         Spacer(Modifier.height(28.dp))

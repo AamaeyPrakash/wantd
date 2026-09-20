@@ -1,6 +1,7 @@
 package com.tapshop.server
 
 import com.tapshop.server.ai.ShoppingAssistant
+import com.tapshop.server.ai.AiUnavailableException
 import com.tapshop.server.data.InMemoryStore
 import com.tapshop.server.data.Seed
 import com.tapshop.server.routes.apiRoutes
@@ -47,6 +48,10 @@ fun Application.module() {
         allowMethod(HttpMethod.Options)
     }
     install(StatusPages) {
+        exception<AiUnavailableException> { call, cause ->
+            call.application.log.warn("AI request unavailable on ${call.request.local.uri}")
+            call.respond(HttpStatusCode.ServiceUnavailable, mapOf("error" to cause.message))
+        }
         exception<Throwable> { call, cause ->
             call.application.log.error("Unhandled error on ${call.request.local.uri}", cause)
             call.respond(HttpStatusCode.InternalServerError, mapOf("error" to (cause.message ?: cause::class.simpleName ?: "error")))
@@ -58,9 +63,9 @@ fun Application.module() {
         webRoutes(store)
     }
 
-    log.info("TapShop server ready")
+    log.info("wantd. server ready")
     log.info("  Buyer app      : ${Config.publicBaseUrl}/")
     log.info("  Merchant app   : ${Config.publicBaseUrl}/merchant/")
     log.info("  QR sheet       : ${Config.publicBaseUrl}/qr-sheet")
-    log.info("  AI             : ${if (assistant.mock) "DEMO MODE (set OPENAI_API_KEY to enable Koog + OpenAI)" else "Koog + OpenAI enabled"}")
+    log.info("  AI             : ${if (assistant.enabled) "OpenAI API configured (no canned answers)" else "Unavailable (set OPENAI_API_KEY)"}")
 }

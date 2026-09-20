@@ -25,6 +25,15 @@ dependencies {
     implementation(libs.zxing.javase)
 
     implementation(libs.logback.classic)
+
+    testImplementation(kotlin("test"))
+    testImplementation("io.ktor:ktor-server-test-host:${libs.versions.ktor.get()}")
+}
+
+tasks.test {
+    // Tests inject API fixtures or exercise missing-key errors; they never call the paid API.
+    environment("OPENAI_API_KEY", "")
+    environment("PUBLIC_BASE_URL", "https://wantd-demo.example.test")
 }
 
 tasks.named<JavaExec>("run") {

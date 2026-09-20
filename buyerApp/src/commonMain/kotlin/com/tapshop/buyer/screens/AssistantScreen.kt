@@ -40,6 +40,7 @@ import com.tapshop.shared.model.ChatRequest
 import com.tapshop.ui.app.LocalApi
 import com.tapshop.ui.components.Chip
 import com.tapshop.ui.components.CircleIconButton
+import com.tapshop.ui.components.ErrorBanner
 import com.tapshop.ui.components.LargeTitle
 import com.tapshop.ui.components.SparkleIcon
 import com.tapshop.ui.components.TapTextField
@@ -47,6 +48,7 @@ import com.tapshop.ui.components.ThinkingDots
 import com.tapshop.ui.settings.LocalAppSettings
 import com.tapshop.ui.theme.TapTheme
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
 
 @Composable
 fun AssistantScreen() {
@@ -60,13 +62,15 @@ fun AssistantScreen() {
 
     var input by remember { mutableStateOf("") }
     var thinking by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
     val messages = state.chat
 
-    fun send(text: String) {
+    fun send(text: String, retry: Boolean = false) {
         val trimmed = text.trim()
         if (trimmed.isEmpty() || thinking) return
         input = ""
-        messages.add(ChatMessage("user", trimmed))
+        error = null
+        if (!retry) messages.add(ChatMessage("user", trimmed))
         scope.launch {
             thinking = true
             try {
@@ -74,8 +78,10 @@ fun AssistantScreen() {
                 messages.add(ChatMessage("assistant", response.reply))
                 // Tools may have changed the cart (e.g. "add it to my cart"), so refresh quietly.
                 state.refresh()
-            } catch (t: Throwable) {
-                messages.add(ChatMessage("assistant", "${s.compareError} (${t.message ?: ""})"))
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                error = s.compareError
             } finally {
                 thinking = false
             }
@@ -101,7 +107,7 @@ fun AssistantScreen() {
             contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            item { Bubble(ChatMessage("assistant", s.assistantIntro)) }
+            item { Text(s.assistantIntro, style = MaterialTheme.typography.bodyMedium, color = c.secondary) }
             if (messages.isEmpty()) {
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 6.dp)) {
@@ -112,6 +118,13 @@ fun AssistantScreen() {
                 }
             }
             messages.forEach { m -> item { Bubble(m) } }
+            error?.let { message ->
+                item {
+                    ErrorBanner(message, retryLabel = s.retry, onRetry = {
+                        messages.lastOrNull { it.role == "user" }?.let { send(it.content, retry = true) }
+                    })
+                }
+            }
             if (thinking) {
                 item {
                     Box(Modifier.clip(RoundedCornerShape(20.dp)).background(c.surface).padding(horizontal = 16.dp, vertical = 14.dp)) { ThinkingDots() }

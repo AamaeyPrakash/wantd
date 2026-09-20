@@ -23,15 +23,18 @@ class ShoppingTools(private val store: InMemoryStore, private val uid: String) :
     }
 
     @Tool
-    @LLMDescription("Returns the shopper's current cart with quantities and the running total.")
+    @LLMDescription("Returns the shopper's current cart with selected sizes and colours, category, material, style tags, quantities and totals. Use it as context for complementary recommendations.")
     fun getCart(): String {
         val items = store.cart(uid)
         if (items.isEmpty()) return "The cart is empty."
-        val total = items.sumOf { it.article.priceCents * it.item.quantity }
+        val totals = items.groupBy { it.article.currency }.map { (currency, entries) ->
+            formatPrice(entries.sumOf { it.article.priceCents * it.item.quantity }, currency)
+        }
         return items.joinToString("\n") { e ->
             "- id=${e.article.id} | ${e.article.name} x${e.item.quantity} | ${formatPrice(e.article.priceCents, e.article.currency)} each" +
-                (e.item.size?.let { " | size $it" } ?: "") + (e.item.color?.let { " | colour $it" } ?: "")
-        } + "\nTotal: ${formatPrice(total, items.first().article.currency)}"
+                (e.item.size?.let { " | size $it" } ?: "") + (e.item.color?.let { " | colour $it" } ?: "") +
+                " | ${e.article.category} | ${e.article.material} | tags: ${e.article.tags.joinToString()}"
+        } + "\nTotal: ${totals.joinToString(" + ")}"
     }
 
     @Tool
@@ -53,10 +56,11 @@ class ShoppingTools(private val store: InMemoryStore, private val uid: String) :
     }
 
     @Tool
-    @LLMDescription("Lists every tagged piece available across all participating stores (id, name, brand, price, category).")
+    @LLMDescription("Lists every piece in the catalogue, including items outside the wishlist, with id, name, brand, price, category, material, colours and stock. Use getArticle for full details before recommending.")
     fun listCatalogue(): String =
         store.articles().joinToString("\n") { a ->
-            "- id=${a.id} | ${a.name} by ${a.brand} | ${a.category} | ${formatPrice(a.priceCents, a.currency)} | ${a.material}"
+            "- id=${a.id} | ${a.name} by ${a.brand} | ${a.category} | ${formatPrice(a.priceCents, a.currency)} | ${a.material}" +
+                " | colours: ${a.colors.joinToString { it.name }} | stock: ${a.stock}"
         }
 
     @Tool

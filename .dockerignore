@@ -1,0 +1,15 @@
+.git
+.gradle
+.kotlin
+.idea
+.codex
+.agents
+**/build
+**/node_modules
+.env
+.env.*
+**/.env
+**/.env.*
+*.log
+kotlin-js-store
+Sample UI

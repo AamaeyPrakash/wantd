@@ -35,8 +35,8 @@ fun Route.webRoutes(store: InMemoryStore) {
         get("/") {
             call.respondText(
                 """
-                <html><body style="font-family:-apple-system,Segoe UI,sans-serif;padding:40px;color:#111">
-                <h2>TapShop server is running</h2>
+                <html><body style="font-family:-apple-system,Segoe UI,sans-serif;padding:40px;color:#222222;background:#f6f4f0">
+                <h2>wantd. server is running</h2>
                 <p>The buyer web app has not been built yet. Run:</p>
                 <pre>gradlew :buyerApp:wasmJsBrowserDistribution :merchantApp:wasmJsBrowserDistribution</pre>
                 <p>and restart the server, or use the dev servers (see README).</p>
@@ -96,15 +96,15 @@ private fun qrSheetHtml(store: InMemoryStore): String {
     <html lang="en">
     <head>
       <meta charset="utf-8">
-      <title>TapShop · QR sheet</title>
+      <title>wantd. · QR sheet</title>
       <style>
         :root { color-scheme: light; }
-        body { margin: 0; padding: 32px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif; background: #F4F4F6; color: #111114; }
+        body { margin: 0; padding: 32px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif; background: #f6f4f0; color: #222222; }
         h1 { font-size: 28px; letter-spacing: -0.02em; margin: 0 0 4px; }
         .sub { color: #6E6E73; margin-bottom: 24px; font-size: 14px; }
         .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
-        .card { background: #fff; border-radius: 24px; padding: 24px; display: flex; gap: 20px; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,.04); page-break-inside: avoid; }
-        .qr { width: 220px; height: 220px; border-radius: 16px; background: #fff; }
+        .card { background: #f6f4f0; border-radius: 24px; padding: 24px; display: flex; gap: 20px; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,.04); page-break-inside: avoid; }
+        .qr { width: 220px; height: 220px; border-radius: 16px; background: #f6f4f0; }
         .brand { font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: #6E6E73; }
         .name { font-size: 22px; font-weight: 600; letter-spacing: -0.01em; margin: 2px 0; }
         .price { font-size: 18px; margin-bottom: 6px; }
@@ -112,13 +112,13 @@ private fun qrSheetHtml(store: InMemoryStore): String {
         .hint { margin-top: 10px; font-size: 13px; }
         .url { margin-top: 6px; font-size: 11px; color: #98989D; word-break: break-all; }
         .toolbar { display: flex; gap: 12px; align-items: center; margin-bottom: 24px; }
-        button { border: 0; background: #111114; color: #fff; padding: 12px 20px; border-radius: 999px; font-size: 14px; cursor: pointer; }
-        a { color: #111114; }
-        @media print { body { background: #fff; padding: 0; } .toolbar, .sub a { display: none; } .card { box-shadow: none; border: 1px solid #eee; } }
+        button { border: 0; background: #222222; color: #f6f4f0; padding: 12px 20px; border-radius: 999px; font-size: 14px; cursor: pointer; }
+        a { color: #222222; }
+        @media print { body { background: #f6f4f0; padding: 0; } .toolbar, .sub a { display: none; } .card { box-shadow: none; border: 1px solid #eee; } }
       </style>
     </head>
     <body>
-      <h1>TapShop tags</h1>
+      <h1>wantd. tags</h1>
       <div class="sub">Print and place on the racks. Shoppers open <b>$base</b> · Merchant dashboard: <a href="$base/merchant/">$base/merchant/</a></div>
       <div class="toolbar"><button onclick="window.print()">Print</button><span style="color:#6E6E73;font-size:13px">${store.articles().size} pieces</span></div>
       <div class="grid">

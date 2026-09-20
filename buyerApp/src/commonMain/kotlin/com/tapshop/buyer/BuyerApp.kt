@@ -42,7 +42,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tapshop.buyer.screens.ArticleScreen
@@ -57,7 +56,7 @@ import com.tapshop.ui.app.TapShopApp
 import com.tapshop.ui.components.CircleIconButton
 import com.tapshop.ui.components.HairlineDivider
 import com.tapshop.ui.components.SparkleIcon
-import com.tapshop.ui.components.TagIcon
+import com.tapshop.ui.components.WantdLogo
 import com.tapshop.ui.nav.Navigator
 import com.tapshop.ui.platform.clearDeepLink
 import com.tapshop.ui.settings.AppSettings
@@ -223,15 +222,10 @@ private fun TopNav(current: Screen) {
                 Modifier.widthIn(max = DesktopContentWidth).fillMaxWidth().height(64.dp).padding(horizontal = 24.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Row(
+                Box(
                     Modifier.clip(RoundedCornerShape(12.dp)).clickable { nav.reset(Screen.Home) }.padding(horizontal = 8.dp, vertical = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Box(Modifier.size(28.dp).clip(RoundedCornerShape(8.dp)).background(c.onSurface), contentAlignment = Alignment.Center) {
-                        Icon(TagIcon, null, tint = c.background, modifier = Modifier.size(16.dp))
-                    }
-                    Spacer(Modifier.width(10.dp))
-                    Text(s.appName, style = MaterialTheme.typography.titleMedium, color = c.onSurface, fontWeight = FontWeight.SemiBold)
+                    WantdLogo(height = 34.dp)
                 }
                 Spacer(Modifier.weight(1f))
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {

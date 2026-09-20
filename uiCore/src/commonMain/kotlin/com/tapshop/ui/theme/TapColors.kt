@@ -5,8 +5,8 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
 /**
- * TapShop palette. One accent, black/white pills, hairline separators — the "designed in Cupertino" look.
- * Swap [accent] to re-skin the whole app.
+ * wantd. palette. Brand white [BrandWhite] and brand black [BrandBlack] are the two anchors; everything else is
+ * a tint of them. One accent, black/white pills, hairline separators.
  */
 @Immutable
 data class TapColors(
@@ -29,42 +29,45 @@ data class TapColors(
     val isDark: Boolean,
 )
 
+val BrandWhite = Color(0xFFF6F4F0)
+val BrandBlack = Color(0xFF222222)
+
 val LightTapColors = TapColors(
-    background = Color(0xFFF4F4F6),
-    surface = Color(0xFFFFFFFF),
-    surfaceVariant = Color(0xFFF2F2F5),
+    background = BrandWhite,
+    surface = Color(0xFFFCFBF9),
+    surfaceVariant = Color(0xFFEDEAE4),
     surfaceElevated = Color(0xFFFFFFFF),
-    onSurface = Color(0xFF111114),
-    secondary = Color(0xFF6E6E73),
-    tertiary = Color(0xFF98989D),
-    separator = Color(0xFFE5E5EA),
+    onSurface = BrandBlack,
+    secondary = Color(0xFF6F6C68),
+    tertiary = Color(0xFF9B978F),
+    separator = Color(0xFFE3DFD8),
     accent = Color(0xFFFF6B3D),
-    onAccent = Color(0xFFFFFFFF),
-    accentSoft = Color(0xFFFFE9E1),
-    pill = Color(0xFF111114),
-    onPill = Color(0xFFFFFFFF),
-    success = Color(0xFF34C759),
-    danger = Color(0xFFFF3B30),
-    scrim = Color(0x66000000),
+    onAccent = BrandWhite,
+    accentSoft = Color(0xFFFFE6DB),
+    pill = BrandBlack,
+    onPill = BrandWhite,
+    success = Color(0xFF2FAE58),
+    danger = Color(0xFFE5433A),
+    scrim = Color(0x66222222),
     isDark = false,
 )
 
 val DarkTapColors = TapColors(
-    background = Color(0xFF0B0B0F),
-    surface = Color(0xFF1C1C1E),
-    surfaceVariant = Color(0xFF2C2C2E),
-    surfaceElevated = Color(0xFF232326),
-    onSurface = Color(0xFFF5F5F7),
-    secondary = Color(0xFF98989D),
-    tertiary = Color(0xFF6E6E73),
-    separator = Color(0xFF34343A),
+    background = BrandBlack,
+    surface = Color(0xFF2C2C2C),
+    surfaceVariant = Color(0xFF383838),
+    surfaceElevated = Color(0xFF303030),
+    onSurface = BrandWhite,
+    secondary = Color(0xFFA9A59E),
+    tertiary = Color(0xFF7C7873),
+    separator = Color(0xFF3E3E3E),
     accent = Color(0xFFFF7A50),
-    onAccent = Color(0xFF111114),
-    accentSoft = Color(0xFF3A241C),
-    pill = Color(0xFFF5F5F7),
-    onPill = Color(0xFF111114),
-    success = Color(0xFF30D158),
-    danger = Color(0xFFFF453A),
+    onAccent = BrandBlack,
+    accentSoft = Color(0xFF45302A),
+    pill = BrandWhite,
+    onPill = BrandBlack,
+    success = Color(0xFF3CCB64),
+    danger = Color(0xFFFF5A50),
     scrim = Color(0x99000000),
     isDark = true,
 )

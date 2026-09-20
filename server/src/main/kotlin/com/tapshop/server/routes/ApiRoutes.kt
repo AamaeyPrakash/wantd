@@ -17,6 +17,7 @@ import com.tapshop.shared.model.ServerInfo
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receive
+import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondBytes
 import io.ktor.server.routing.Route
@@ -32,8 +33,8 @@ fun Route.apiRoutes(store: InMemoryStore, assistant: ShoppingAssistant) {
             call.respond(
                 ServerInfo(
                     publicBaseUrl = Config.publicBaseUrl,
-                    aiEnabled = !assistant.mock,
-                    aiMock = assistant.mock,
+                    aiEnabled = assistant.enabled,
+                    aiMock = false,
                     version = Config.VERSION,
                 ),
             )
@@ -144,9 +145,23 @@ fun Route.apiRoutes(store: InMemoryStore, assistant: ShoppingAssistant) {
         // ---- AI --------------------------------------------------------------------------------
         route("/ai") {
             post("/compare") {
-                val request = call.receive<CompareRequest>()
+                val request = try {
+                    call.receive<CompareRequest>()
+                } catch (_: BadRequestException) {
+                    call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Choose two pieces and answer all four preference questions."))
+                    return@post
+                }
+                if (request.articleIds.size != 2 || request.articleIds.distinct().size != 2) {
+                    call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Select exactly two different pieces to compare."))
+                    return@post
+                }
+                if (request.articleIds.any { store.article(it) == null }) {
+                    call.respond(HttpStatusCode.NotFound, mapOf("error" to "One of the selected pieces is no longer available."))
+                    return@post
+                }
+                val result = assistant.compare(request)
                 request.articleIds.forEach { store.record(AnalyticsEvent(request.uid, it, EventType.COMPARE)) }
-                call.respond(assistant.compare(request))
+                call.respond(result)
             }
             post("/chat") {
                 val request = call.receive<ChatRequest>()

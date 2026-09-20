@@ -1,9 +1,9 @@
-# TapShop — tap a tag in store, decide later, let AI compare
+# wantd. — tap a tag in store, decide later, let AI compare
 
 Kotlin Multiplatform hackathon project. Shoppers tap an NFC tag or scan a QR code on any piece in a
 physical store, and the piece lands in their wishlist with price, material, brand and the exact store
-location. They keep browsing across stores, then let a Koog-powered AI assistant compare their saved
-pieces (optionally against a photo of themselves) before deciding what to buy. Merchants get a live
+location. They keep browsing across stores, then let a Koog-powered AI assistant compare two saved
+pieces using colour, style/fit, occasion and shopping priority before deciding what to buy. Merchants get a live
 dashboard of scans, saves, cart adds and reservations per article.
 
 Everything is Kotlin: Compose Multiplatform (Wasm + Desktop) on the front, Ktor + Koog on the back.
@@ -26,8 +26,10 @@ merchant dashboard opens straight on the Overview.
 - JDK 21+ (the repo is configured for IntelliJ's bundled JBR 25 in `gradle.properties`
   → `org.gradle.java.home`; change or remove that line if your path differs).
 - A modern browser with WasmGC (Chrome 119+, Safari 18.2+, Firefox 120+). The buyer app is meant for a phone.
-- Optional: an OpenAI API key for real AI answers. Without it the server runs in **demo mode** with
-  realistic canned answers so the presentation never depends on network or quota.
+- An OpenAI API key for AI answers, stored as `OPENAI_API_KEY` in the repo-root `.env`
+  or server environment. Missing keys and API failures return an error; there are no canned answers.
+
+For hosting, phone scanning and public QR links, see [the demo deployment guide](DEMO_DEPLOYMENT.md).
 
 ## Run (demo setup, one process)
 
@@ -36,7 +38,7 @@ merchant dashboard opens straight on the Overview.
 .\gradlew.bat :buyerApp:wasmJsBrowserDistribution :merchantApp:wasmJsBrowserDistribution
 
 # 2. Start the server. It serves the API, both web apps and the QR sheet on :8080
-$env:OPENAI_API_KEY = "sk-..."      # optional; omit for demo mode
+# Set OPENAI_API_KEY in the repo-root .env first (the key stays on the server).
 .\gradlew.bat :server:run
 ```
 
@@ -62,9 +64,8 @@ Desktop merchant app (native window instead of the browser):
 | Variable          | Default                          | Purpose                                                        |
 |-------------------|----------------------------------|----------------------------------------------------------------|
 | `PORT`            | `8080`                           | Server port                                                    |
-| `OPENAI_API_KEY`  | –                                | Enables Koog + OpenAI. Absent → demo mode                      |
+| `OPENAI_API_KEY`  | –                                | Required for AI answers. Absent → HTTP 503                      |
 | `OPENAI_MODEL`    | `gpt-5.4-mini` (then fallbacks)  | Vision-capable model id, e.g. `gpt-4o`, `gpt-4.1`, `gpt-5-mini` |
-| `AI_MOCK`         | `false`                          | Force demo answers even with a key                             |
 | `PUBLIC_BASE_URL` | auto-detected LAN IPv4           | URL baked into QR codes; set it when using a tunnel            |
 
 If the venue Wi-Fi blocks device-to-device traffic, expose the server with a quick tunnel and point
@@ -94,14 +95,13 @@ same origin. Deep links work in dev too: `http://localhost:3000/?a=linen-overshi
 2. **Scan** – on the phone, scan piece 1. The article page opens full-bleed with the "Scanned at
    Maison Noor" chip, size / colour / quantity, composition and store location. Tap **♥ Save**.
    Repeat for pieces 2–4 (different brands, different malls).
-3. **Wishlist** – pieces are grouped by store with their location. Tap **Compare with AI**
-   (or **Select** to pick 2–3). The verdict card names a best pick, followed by score bars for
-   fit, colour & versatility, material quality, price-to-quality, occasion, with notes.
-4. **Photo** – "Add a photo" of yourself / your outfit, ask "which works for a summer wedding?",
-   **Compare again**. With a key, OpenAI sees the product photos and yours; in demo mode the
-   canned answer still updates.
+3. **Wishlist** – tap **Compare with AI**, select exactly two pieces, then tap the compare pill.
+4. **Compare** – answer colour, style/fit, occasion and what matters most (or choose **No preference**),
+   then **Get my recommendation**. The assistant names one pick and gives one or two short sentences
+   of reasoning using those answers and the product facts, including price. Changing an answer clears
+   the previous result. Product photos are sent automatically; no shopper photo is needed.
 5. **Assistant** – "Ask a follow-up" opens the chat. The Koog agent has tools that read the real
-   wishlist / cart and can add to cart ("add the jacket to my cart").
+   cart, wishlist and full catalogue, can recommend unsaved items to go with the cart, and can add to cart ("add the jacket to my cart").
 6. **Cart → Reserve at store** – the reservation code appears on the phone…
 7. …and on the **merchant Reservations** tab a few seconds later (dashboard polls every 4 s). The
    Overview KPIs and per-article chart already include the live scans / saves from the demo.
@@ -115,9 +115,17 @@ same origin. Deep links work in dev too: `http://localhost:3000/?a=linen-overshi
 - `GET|POST /api/users/{uid}/cart`, `PUT|DELETE /api/users/{uid}/cart/{articleId}?quantity=`, `POST /api/users/{uid}/reserve`
 - `GET /api/reservations`, `PUT /api/reservations/{id}?status=PICKED_UP`
 - `POST /api/events` (`SCAN VIEW WISHLIST_ADD CART_ADD SHARE COMPARE RESERVE`) · `GET /api/analytics/summary`
-- `POST /api/ai/compare` `{ uid, articleIds[], userImagesBase64[], question?, language }` → `CompareResult`
+- `POST /api/ai/compare` `{ uid, articleIds: [id1, id2], preferences: { color, fit, occasion, priority }, language }` → `CompareResult`
 - `POST /api/ai/chat` `{ uid, messages[], language }` → `{ reply }`
 - `GET /api/images/{file}` · `GET /qr-sheet` · `/` buyer app · `/merchant/` merchant app
+
+The four preference fields are required, with stable values independent of the display language:
+`color`: `ANY | NEUTRAL | DARK | LIGHT | BOLD`; `fit`: `ANY | RELAXED | REGULAR | TAILORED | OVERSIZED`;
+`occasion`: `ANY | EVERYDAY | WORK | EVENING | TRAVEL`; `priority`: `ANY | PRICE | QUALITY | VERSATILITY | COMFORT`.
+Compare rejects duplicate IDs or a selection other than two. Results contain `summary`, `winnerArticleId`,
+`recommendation` and `mock`; there is no score breakdown. Rebuild both the buyer app and server together.
+Every successful AI response comes from OpenAI, including the suggestion headline. Missing credentials,
+failed model calls or invalid responses return HTTP 503. The legacy `mock` flag is always `false`.
 
 ## NFC vs QR
 
