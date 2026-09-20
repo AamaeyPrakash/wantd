@@ -1,0 +1,14 @@
+.gradle/
+build/
+*/build/
+.kotlin/
+kotlin-js-store/
+out/
+.idea/workspace.xml
+.idea/caches/
+.idea/libraries/
+.idea/modules.xml
+*.iml
+local.properties
+.env
+*.log
