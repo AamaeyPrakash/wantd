@@ -1,5 +1,8 @@
 # Build the existing Kotlin server and both Compose web apps together.
 FROM eclipse-temurin:25-jdk-jammy AS build
+# The Node.js runtime downloaded by Kotlin/Wasm requires libatomic.so.1.
+RUN apt-get update && apt-get install -y --no-install-recommends libatomic1 \
+    && rm -rf /var/lib/apt/lists/*
 WORKDIR /workspace
 COPY . .
 # Override the Windows-only Java path for this Linux build. Run compilation in
