@@ -18,6 +18,7 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.calllogging.CallLogging
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.plugins.conditionalheaders.ConditionalHeaders
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.response.respond
@@ -34,6 +35,7 @@ fun Application.module() {
     val assistant = ShoppingAssistant(store)
 
     install(ContentNegotiation) { json(AppJson) }
+    install(ConditionalHeaders)
     install(CallLogging) {
         level = Level.INFO
         filter { call -> call.request.local.uri.startsWith("/api") && !call.request.local.uri.startsWith("/api/images") }

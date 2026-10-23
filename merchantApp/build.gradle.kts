@@ -45,3 +45,5 @@ compose.desktop {
         }
     }
 }
+
+apply(from = rootProject.file("gradle/web-assets.gradle.kts"))

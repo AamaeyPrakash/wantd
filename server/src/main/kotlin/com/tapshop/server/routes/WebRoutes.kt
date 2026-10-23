@@ -5,11 +5,17 @@ import com.tapshop.server.data.InMemoryStore
 import com.tapshop.shared.api.ApiRoutes
 import com.tapshop.shared.model.formatPrice
 import io.ktor.http.ContentType
+import io.ktor.http.CacheControl
+import io.ktor.http.HttpHeaders
+import io.ktor.http.content.EntityTagVersion
+import io.ktor.server.http.content.CompressedFileType
 import io.ktor.server.http.content.staticFiles
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import java.io.File
+import java.security.MessageDigest
+import java.util.HexFormat
 
 /** Serves the two Compose-for-Web apps and the printable QR sheet. */
 fun Route.webRoutes(store: InMemoryStore) {
@@ -21,16 +27,10 @@ fun Route.webRoutes(store: InMemoryStore) {
     val merchantDir = resolveDist(Config.merchantDist)
 
     if (merchantDir != null) {
-        staticFiles("/merchant", merchantDir) {
-            default("index.html")
-            contentType(::webContentType)
-        }
+        webApp("/merchant", merchantDir)
     }
     if (buyerDir != null) {
-        staticFiles("/", buyerDir) {
-            default("index.html")
-            contentType(::webContentType)
-        }
+        webApp("/", buyerDir)
     } else {
         get("/") {
             call.respondText(
@@ -45,6 +45,41 @@ fun Route.webRoutes(store: InMemoryStore) {
                 """.trimIndent(),
                 ContentType.Text.Html,
             )
+        }
+    }
+}
+
+private val contentHashedAsset = Regex("^[a-fA-F0-9]{16,64}\\.(wasm|js|mjs|css)$")
+private object Immutable : CacheControl(null) {
+    override fun toString() = "immutable"
+}
+
+/** Cache only versioned assets indefinitely; revalidate entry points on each visit. */
+internal fun Route.webApp(path: String, directory: File) {
+    staticFiles(path, directory) {
+        default("index.html")
+        contentType(::webContentType)
+        preCompressed(CompressedFileType.GZIP)
+        etag { resource ->
+            val file = resource as File // This route serves files, not classpath resources.
+            val name = file.name.removeSuffix(".gz")
+            // Fixed-name entry points may change without changing their size or timestamp.
+            val version = if (contentHashedAsset.matches(name)) name else
+                HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(file.readBytes()))
+            // The original and gzip representation describe the same resource.
+            EntityTagVersion(version, weak = true)
+        }
+        cacheControl { file ->
+            if (contentHashedAsset.matches(file.name.removeSuffix(".gz"))) {
+                listOf(CacheControl.MaxAge(31_536_000, visibility = CacheControl.Visibility.Public), Immutable)
+            } else {
+                // HTML and fixed-name JS must not keep pointing to a previous deployment's Wasm.
+                listOf(CacheControl.NoCache(null))
+            }
+        }
+        modify { _, call ->
+            // Also vary uncompressed responses, so intermediary caches respect negotiation.
+            call.response.headers.append(HttpHeaders.Vary, HttpHeaders.AcceptEncoding)
         }
     }
 }

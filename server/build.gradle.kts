@@ -17,6 +17,7 @@ dependencies {
     implementation(libs.ktor.server.cors)
     implementation(libs.ktor.server.status.pages)
     implementation(libs.ktor.server.call.logging)
+    implementation(libs.ktor.server.conditional.headers)
     implementation(libs.ktor.serialization.kotlinx.json)
 
     implementation(libs.koog.agents)
